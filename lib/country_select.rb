@@ -42,8 +42,12 @@ module ActionView
       # have to wrap this call in a regular HTML
       # select tag.
       #
-      def country_options_for_select(selected = nil, priority_countries = nil, use_iso_codes = false, use_locale = nil)
+      def country_options_for_select(selected = nil, priority_countries = nil, prompt = nil, use_iso_codes = false, use_locale = nil)
         country_options = "".html_safe
+
+        if prompt
+          country_options += "<option value=\"\" disabled=\"disabled\" selected>#{prompt}</option>\n".html_safe
+        end
 
         if priority_countries
           priority_countries_options = if use_iso_codes || ::CountrySelect.use_iso_codes
@@ -92,13 +96,14 @@ module ActionView
     module ToCountrySelectTag
       def to_country_select_tag(priority_countries, options, html_options)
         use_iso_codes = options.delete(:iso_codes)
+        prompt = options.delete(:prompt)
         use_locale = options.delete(:locale)
         html_options = html_options.stringify_keys
         add_default_name_and_id(html_options)
         value = value(object)
         content_tag("select",
           add_options(
-            country_options_for_select(value, priority_countries, use_iso_codes, use_locale),
+            country_options_for_select(value, priority_countries, prompt, use_iso_codes, use_locale),
             options, value
           ), html_options
         )
